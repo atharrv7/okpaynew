@@ -1,0 +1,77 @@
+﻿git : remote: error: GH013: 
+Repository rule violations 
+found for refs/heads/master.  
+      
+At line:1 char:1
++ git push -u origin master > 
+git_push_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (remote: e  
+  rror: ...master.        :   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+remote: 
+remote: - GITHUB PUSH 
+PROTECTION        
+remote:   ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇö        
+remote:     Resolve the 
+following violations before 
+pushing again        
+remote: 
+remote:     - Push cannot 
+contain secrets        
+remote: 
+remote:             
+remote:      (?) Learn how to 
+resolve a blocked push        
+remote:      https://docs.gith
+ub.com/code-security/secret-sc
+anning/working-with-secret-sca
+nning-and-push-protection/work
+ing-with-push-protection-from-
+the-command-line#resolving-a-b
+locked-push        
+remote:             
+remote:             
+remote:       ΓÇöΓÇö Google 
+Cloud Service Account 
+Credentials ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇö        
+remote:        locations:     
+   
+remote:          - commit: 703
+bdecc9ef334b800134d208656d518f
+4b1476e        
+remote:            path: OneDr
+ive/Desktop/APP/backend/servic
+eAccountKey.json:1        
+remote:             
+remote:        (?) To push, 
+remove secret from commit(s) 
+or follow this URL to allow 
+the secret.        
+remote:        https://github.
+com/atharrv7/okpay/security/se
+cret-scanning/unblock-secret/3
+ATxVlMytlX5nk2KGRSLUCDs6Oi    
+    
+remote:             
+remote: 
+remote: 
+To https://github.com/atharrv7
+/okpay.git
+ ! [remote rejected] master 
+-> master (push declined due 
+to repository rule violations)
+error: failed to push some 
+refs to 'https://github.com/at
+harrv7/okpay.git'
