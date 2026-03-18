@@ -52,11 +52,17 @@ const updateLink = async (linkId, updates) => {
     return link;
 };
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Create Razorpay client lazily so missing env vars do not crash app startup
+const createRazorpayClient = () => {
+    const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
+    if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+        return null;
+    }
+    return new Razorpay({
+        key_id: RAZORPAY_KEY_ID,
+        key_secret: RAZORPAY_KEY_SECRET,
+    });
+};
 
 // ─────────────────────────────────────────────
 // SEND MONEY ENDPOINTS
@@ -66,14 +72,23 @@ const razorpay = new Razorpay({
 // @desc    Create a new Razorpay Order (for Send Money)
 router.post('/create-order', async (req, res) => {
     try {
-        const { amount, currency = "INR", receipt } = req.body;
+        const razorpay = createRazorpayClient();
+        if (!razorpay) {
+            return res.status(500).json({
+                success: false,
+                message: "Razorpay keys are not configured on server"
+            });
+        }
 
-        if (!amount) {
-            return res.status(400).json({ success: false, message: "Amount is required" });
+        const { amount = 500, currency = "INR", receipt } = req.body;
+        const parsedAmount = Number(amount);
+
+        if (!parsedAmount || parsedAmount <= 0) {
+            return res.status(400).json({ success: false, message: "Valid amount is required" });
         }
 
         const options = {
-            amount: Math.round(amount * 100),
+            amount: Math.round(parsedAmount * 100),
             currency,
             receipt: receipt || `receipt_${Date.now()}`,
         };
@@ -208,6 +223,14 @@ router.get('/link/:linkId', async (req, res) => {
 // @desc    Create Razorpay order for a payment link
 router.post('/link/:linkId/pay', async (req, res) => {
     try {
+        const razorpay = createRazorpayClient();
+        if (!razorpay) {
+            return res.status(500).json({
+                success: false,
+                message: "Razorpay keys are not configured on server"
+            });
+        }
+
         const { linkId } = req.params;
         const { amount } = req.body;
 

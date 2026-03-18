@@ -4,7 +4,7 @@ import { Copy, Share2, Check, QrCode as QrIcon, Link as LinkIcon, Send, Loader2,
 import { useAuth } from "../../contexts/AuthContext"
 import { useState, useEffect } from "react"
 
-const BACKEND_URL = "http://localhost:5000"
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"
 
 export default function ReceiveMoney() {
     const { user } = useAuth()

@@ -3,6 +3,8 @@ import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { Wallet, ArrowRight, User, ShieldCheck } from "lucide-react"
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"
+
 export default function SendMoney() {
     const navigate = useNavigate()
 
@@ -74,8 +76,7 @@ export default function SendMoney() {
 
             try {
                 // Call backend to create Razorpay order
-                const backendUrl = "http://localhost:5000" // Configure according to your environment
-                const orderResponse = await fetch(`${backendUrl}/api/payment/create-order`, {
+                const orderResponse = await fetch(`${BACKEND_URL}/api/payment/create-order`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -102,7 +103,7 @@ export default function SendMoney() {
                     handler: async function (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
                         // Optional: Verify payment signature with backend
                         try {
-                            const verifyResponse = await fetch(`${backendUrl}/api/payment/verify`, {
+                            const verifyResponse = await fetch(`${BACKEND_URL}/api/payment/verify`, {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json"
