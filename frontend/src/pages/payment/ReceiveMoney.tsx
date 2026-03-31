@@ -3,8 +3,7 @@ import QRCode from "react-qr-code"
 import { Copy, Share2, Check, QrCode as QrIcon, Link as LinkIcon, Send, Loader2, Download, Eye, EyeOff } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
 import { useState, useEffect } from "react"
-
-const BACKEND_URL = import.meta.env.MODE === 'development' ? 'http://localhost:5000' : 'https://okpay-3818.onrender.com'
+import { apiUrl } from "../../lib/api"
 
 export default function ReceiveMoney() {
     const { user } = useAuth()
@@ -87,7 +86,7 @@ export default function ReceiveMoney() {
         setIsGenerating(true)
         setIsLinkDisabled(false)
         try {
-            const res = await fetch(`${BACKEND_URL}/api/payment/create-link`, {
+            const res = await fetch(apiUrl("/api/payment/create-link"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -123,7 +122,7 @@ export default function ReceiveMoney() {
         setIsRequesting(true)
         
         try {
-            const res = await fetch(`${BACKEND_URL}/api/payment/request-email`, {
+            const res = await fetch(apiUrl("/api/payment/request-email"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

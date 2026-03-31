@@ -13,12 +13,21 @@ process.on('uncaughtException', () => {});
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "https://okpaynew-sdwp.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
 
 // Basic Route for testing
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to the OkPay Clone API!' });
+});
+
+// Health check route for uptime and deployment verification
+app.get('/health', (req, res) => {
+    res.status(200).json({ ok: true, service: 'okpay-backend' });
 });
 
 // Import and use routes

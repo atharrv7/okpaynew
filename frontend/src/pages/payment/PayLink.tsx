@@ -2,8 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { ShieldCheck, Loader2, AlertCircle, CheckCircle2, Clock, User } from "lucide-react"
-
-const BACKEND_URL = import.meta.env.MODE === 'development' ? 'http://localhost:5000' : 'https://okpay-3818.onrender.com'
+import { apiUrl } from "../../lib/api"
 
 interface LinkData {
     linkId: string
@@ -29,7 +28,7 @@ export default function PayLink() {
     useEffect(() => {
         const fetchLinkDetails = async () => {
             try {
-                const res = await fetch(`${BACKEND_URL}/api/payment/link/${linkId}`)
+                const res = await fetch(apiUrl(`/api/payment/link/${linkId}`))
                 const data = await res.json()
 
                 if (data.success) {
@@ -80,7 +79,7 @@ export default function PayLink() {
 
         try {
             // Create order via backend for this payment link
-            const orderRes = await fetch(`${BACKEND_URL}/api/payment/link/${linkId}/pay`, {
+            const orderRes = await fetch(apiUrl(`/api/payment/link/${linkId}/pay`), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ amount: finalAmount })
@@ -104,7 +103,7 @@ export default function PayLink() {
                 handler: async function (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
                     // Verify payment
                     try {
-                        const verifyRes = await fetch(`${BACKEND_URL}/api/payment/verify`, {
+                        const verifyRes = await fetch(apiUrl("/api/payment/verify"), {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({

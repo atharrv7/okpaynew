@@ -2,8 +2,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { Wallet, ArrowRight, User, ShieldCheck, Smartphone, Lock, X } from "lucide-react"
-
-const BACKEND_URL = import.meta.env.MODE === 'development' ? 'http://localhost:5000' : 'https://okpay-3818.onrender.com'
+import { apiUrl } from "../../lib/api"
 
 export default function SendMoney() {
     const navigate = useNavigate()
@@ -114,7 +113,7 @@ export default function SendMoney() {
         }
 
         try {
-            const orderResponse = await fetch(`${BACKEND_URL}/api/payment/create-order`, {
+            const orderResponse = await fetch(apiUrl("/api/payment/create-order"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ amount: Number(amount) })
@@ -138,7 +137,7 @@ export default function SendMoney() {
                 order_id: orderData.order.id,
                 handler: async function (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
                     try {
-                        const verifyResponse = await fetch(`${BACKEND_URL}/api/payment/verify`, {
+                        const verifyResponse = await fetch(apiUrl("/api/payment/verify"), {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({

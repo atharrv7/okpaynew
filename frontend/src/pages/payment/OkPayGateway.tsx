@@ -17,8 +17,7 @@ import {
     Eye,
     EyeOff
 } from "lucide-react"
-
-const BACKEND_URL = import.meta.env.MODE === 'development' ? 'http://localhost:5000' : 'https://okpay-3818.onrender.com'
+import { apiUrl } from "../../lib/api"
 
 export default function OkPayGateway() {
     const location = useLocation()
@@ -149,7 +148,7 @@ export default function OkPayGateway() {
                 const sendAmount = Number(amount.toString().replace(/,/g, ''));
                 const methodLabel = "Card Payment";
 
-                const response = await fetch(`${BACKEND_URL}/api/payment/okpay-process`, {
+                const response = await fetch(apiUrl("/api/payment/okpay-process"), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -228,7 +227,7 @@ export default function OkPayGateway() {
             setTimeout(() => setProcessingStep("Verifying payment details..."), 1000)
             
             // Real Backend API call
-            const response = await fetch(`${BACKEND_URL}/api/payment/okpay-process`, {
+            const response = await fetch(apiUrl("/api/payment/okpay-process"), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -304,7 +303,7 @@ export default function OkPayGateway() {
                 const sendAmount = Number(amount.toString().replace(/,/g, ''));
                 const methodLabel = selectedBank || "NetBanking";
 
-                const response = await fetch(`${BACKEND_URL}/api/payment/okpay-process`, {
+                const response = await fetch(apiUrl("/api/payment/okpay-process"), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
