@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { ShieldCheck, Loader2, AlertCircle, CheckCircle2, Clock, User } from "lucide-react"
 
-const BACKEND_URL = "https://okpay-3818.onrender.com"
+const BACKEND_URL = import.meta.env.MODE === 'development' ? 'http://localhost:5000' : 'https://okpay-3818.onrender.com'
 
 interface LinkData {
     linkId: string

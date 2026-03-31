@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { Wallet, ArrowRight, User, ShieldCheck, Smartphone, Lock, X } from "lucide-react"
 
-const BACKEND_URL = "https://okpay-3818.onrender.com"
+const BACKEND_URL = import.meta.env.MODE === 'development' ? 'http://localhost:5000' : 'https://okpay-3818.onrender.com'
 
 export default function SendMoney() {
     const navigate = useNavigate()

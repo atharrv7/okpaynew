@@ -4,7 +4,7 @@ import { Copy, Share2, Check, QrCode as QrIcon, Link as LinkIcon, Send, Loader2,
 import { useAuth } from "../../contexts/AuthContext"
 import { useState, useEffect } from "react"
 
-const BACKEND_URL = "https://okpay-3818.onrender.com"
+const BACKEND_URL = import.meta.env.MODE === 'development' ? 'http://localhost:5000' : 'https://okpay-3818.onrender.com'
 
 export default function ReceiveMoney() {
     const { user } = useAuth()
