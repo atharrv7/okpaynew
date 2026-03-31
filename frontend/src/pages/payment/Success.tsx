@@ -19,12 +19,40 @@ export default function Success() {
         status: "success", 
         amount: "500", 
         method: "UPI", 
-        txnId: "TXNTEST123",
-        date: "16 March 2026",
-        time: "11:45 PM"
+        date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        recipient: "Unknown"
     }
 
-    const { status, amount, method, txnId, date, time } = state
+    const { status, amount, method, date, time } = state
+    const txnId = state.txnId || ("TXN" + Math.floor(Math.random() * 1000000000000))
+
+    const handleDownloadReceipt = () => {
+        const receiptText = [
+            "=========================================",
+            "            OKPAY RECEIPT                ",
+            "=========================================",
+            "Status:          " + (status === "success" ? "Successful" : "Failed"),
+            "Transaction ID:  " + txnId,
+            "Paid To:         " + (state.recipient || "User"),
+            "Amount:          ₹" + amount,
+            "Date:            " + date,
+            "Time:            " + time,
+            "Method:          " + method,
+            "=========================================",
+            "      Thank you for using OKPAY!         "
+        ].join('\n');
+
+        const blob = new Blob([receiptText.trim()], { type: "text/plain" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = "OKPAY_Receipt_" + txnId + ".txt"
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+    }
 
     return (
         <div className="max-w-md mx-auto py-12 px-4 animate-in fade-in duration-500">
@@ -92,9 +120,9 @@ export default function Success() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="mt-10 grid grid-cols-2 gap-3">
-                        <button className="flex items-center justify-center gap-2 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold transition-colors border border-slate-700 hover:border-slate-500">
-                            <Download className="w-4 h-4" /> Receipt
+                    <div className="mt-10 grid grid-cols-2 gap-3 print:hidden">
+                        <button onClick={handleDownloadReceipt} className="flex items-center justify-center gap-2 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold transition-colors border border-slate-700 hover:border-slate-500">
+                            <Download className="w-4 h-4" /> Download Receipt
                         </button>
                         <button onClick={() => navigate('/dashboard/transactions')} className="flex items-center justify-center gap-2 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold transition-colors border border-slate-700 hover:border-slate-500">
                             <FileText className="w-4 h-4" /> View TXN

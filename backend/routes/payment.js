@@ -268,4 +268,59 @@ router.post('/link/:linkId/pay', async (req, res) => {
     }
 });
 
+// @route   POST /api/payment/request-email
+// @desc    Send a payment request via email using nodemailer
+router.post('/request-email', async (req, res) => {
+    try {
+        const { receiverEmail, amount, note, senderName } = req.body;
+
+        if (!receiverEmail || !amount) {
+            return res.status(400).json({ success: false, message: "Valid email and amount are required" });
+        }
+
+        const emailService = require('../utils/emailService');
+        await emailService.sendMoneyRequestEmail({ receiverEmail, amount, note, senderName });
+
+        res.json({ success: true, message: "Payment request email sent successfully" });
+    } catch (error) {
+        console.error("Send Email Request Error:", error);
+        res.status(500).json({ success: false, message: error.message || "Something went wrong" });
+    }
+});
+
+// @route   POST /api/payment/okpay-process
+// @desc    Process payment securely through OKPAY Gateway
+router.post('/okpay-process', async (req, res) => {
+    try {
+        const { amount, method, recipient, pin } = req.body;
+
+        if (!pin || pin.length < 4) {
+            return res.status(400).json({ success: false, message: "Invalid Security PIN" });
+        }
+
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid Amount" });
+        }
+
+        // Mock backend processing delay
+        const txnId = "OKPTXN_" + crypto.randomBytes(4).toString('hex').toUpperCase();
+
+        setTimeout(() => {
+            res.json({
+                success: true,
+                message: "Transaction processed successfully",
+                transactionId: txnId,
+                amount,
+                method,
+                recipient,
+                timestamp: new Date().toISOString()
+            });
+        }, 1500);
+
+    } catch (error) {
+        console.error("OKPay Backend Process Error:", error);
+        res.status(500).json({ success: false, message: "Server error during okpay processing" });
+    }
+});
+
 module.exports = router;

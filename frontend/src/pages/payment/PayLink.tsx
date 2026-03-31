@@ -138,7 +138,34 @@ export default function PayLink() {
                 prefill: {
                     name: "",
                     email: "",
-                    contact: ""
+                    contact: "9999999999"
+                },
+                hidden: {
+                    contact: true
+                },
+                config: {
+                    display: {
+                        blocks: {
+                            upi: {
+                                name: "Pay via UPI",
+                                instruments: [
+                                    { method: "upi" }
+                                ]
+                            },
+                            other: {
+                                name: "Other Payment Modes",
+                                instruments: [
+                                    { method: "card" },
+                                    { method: "netbanking" },
+                                    { method: "wallet" }
+                                ]
+                            }
+                        },
+                        sequence: ["block.upi", "block.other"],
+                        preferences: {
+                            show_default_blocks: false
+                        }
+                    }
                 },
                 remember_customer: false,
                 theme: {

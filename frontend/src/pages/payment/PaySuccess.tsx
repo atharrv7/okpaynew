@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 import { useLocation } from "react-router-dom"
-import { Check, XCircle } from "lucide-react"
+import { Check, XCircle, Download } from "lucide-react"
 
 export default function PaySuccess() {
     const location = useLocation()
@@ -17,6 +17,32 @@ export default function PaySuccess() {
     }
 
     const isSuccess = state.status === "success"
+    const txnId = state.transactionId || ("TXN" + Math.floor(Math.random() * 1000000000000))
+
+    const handleDownloadReceipt = () => {
+        const receiptText = [
+            "=========================================",
+            "            OKPAY RECEIPT                ",
+            "=========================================",
+            "Status:          " + (isSuccess ? "Successful" : "Failed"),
+            "Transaction ID:  " + txnId,
+            "Paid To:         " + (state.receiver || "User"),
+            "Amount:          ₹" + state.amount,
+            "Method:          Razorpay (Link)",
+            "=========================================",
+            "      Thank you for using OKPAY!         "
+        ].join('\n').trim();
+
+        const blob = new Blob([receiptText], { type: "text/plain" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = "OKPAY_Receipt_" + txnId + ".txt"
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+    }
 
     return (
         <div className="min-h-screen bg-[#020817] flex items-center justify-center px-4 py-12">
@@ -57,10 +83,10 @@ export default function PaySuccess() {
                 {/* Details */}
                 <div className="p-8">
                     <div className="space-y-4 text-sm font-medium">
-                        {state.transactionId && (
+                        {txnId && (
                             <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
                                 <span className="text-slate-400 uppercase tracking-wider text-xs">Transaction ID</span>
-                                <span className="font-mono text-cyan-400 text-xs">{state.transactionId}</span>
+                                <span className="font-mono text-cyan-400 text-xs">{txnId}</span>
                             </div>
                         )}
                         <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
@@ -77,7 +103,15 @@ export default function PaySuccess() {
                         </div>
                     </div>
 
-                    <div className="mt-10">
+                    <div className="mt-10 space-y-3 print:hidden">
+                        {isSuccess && (
+                            <button 
+                                onClick={handleDownloadReceipt}
+                                className="w-full flex items-center justify-center gap-2 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl font-bold transition-all"
+                            >
+                                <Download className="w-5 h-5" /> Download Receipt
+                            </button>
+                        )}
                         <a 
                             href="/"
                             className="w-full flex items-center justify-center gap-2 py-4 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-xl font-bold transition-all"

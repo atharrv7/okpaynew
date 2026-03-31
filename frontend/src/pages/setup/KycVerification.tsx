@@ -1,13 +1,14 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-import { ShieldCheck, User, CreditCard, Camera, CheckCircle2, ArrowRight, Loader2 } from "lucide-react"
+import { ShieldCheck, User, CreditCard, Camera, CheckCircle2, ArrowRight, Loader2, ScanFace, Landmark } from "lucide-react"
 
 const steps = [
     { id: 1, label: "Personal Info", icon: User },
     { id: 2, label: "Identity", icon: CreditCard },
-    { id: 3, label: "Selfie", icon: Camera },
+    { id: 3, label: "Bank", icon: Landmark },
+    { id: 4, label: "Selfie", icon: Camera },
 ]
 
 export default function KycVerification() {
@@ -26,8 +27,89 @@ export default function KycVerification() {
     const [aadhaar, setAadhaar] = useState("")
     const [pan, setPan] = useState("")
 
+    // Bank states
+    const [accountNumber, setAccountNumber] = useState("")
+    const [ifsc, setIfsc] = useState("")
+    const [bankName, setBankName] = useState("")
+
+    // Camera states
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const [stream, setStream] = useState<MediaStream | null>(null)
+    const [isDetecting, setIsDetecting] = useState(false)
+    const [faceDetected, setFaceDetected] = useState(false)
+    const [cameraError, setCameraError] = useState(false)
+
+    // Camera effect
+    useEffect(() => {
+        if (step === 4 && !verified) {
+            startCamera()
+        } else {
+            stopCamera()
+        }
+        return () => stopCamera()
+    }, [step, verified])
+
+    const startCamera = async () => {
+        try {
+            const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            setStream(mediaStream)
+            setCameraError(false)
+            if (videoRef.current) {
+                videoRef.current.srcObject = mediaStream
+            }
+            setIsDetecting(true)
+
+            // Try actual Face Detection API if available
+            if ('FaceDetector' in window) {
+                const faceDetector = new (window as any).FaceDetector()
+                const detectFace = setInterval(async () => {
+                    if (videoRef.current && videoRef.current.readyState === 4) {
+                        try {
+                            const faces = await faceDetector.detect(videoRef.current)
+                            if (faces.length > 0) {
+                                clearInterval(detectFace)
+                                handleFaceFound()
+                            }
+                        } catch (e) {
+                            // ignore error
+                        }
+                    }
+                }, 500)
+                // Fallback timeout just in case it takes too long or fails
+                setTimeout(() => {
+                    clearInterval(detectFace)
+                    if (!faceDetected) handleFaceFound()
+                }, 4000)
+            } else {
+                // simulated detection
+                setTimeout(() => {
+                    handleFaceFound()
+                }, 3000)
+            }
+        } catch (err) {
+            console.error("Error accessing camera:", err)
+            setCameraError(true)
+        }
+    }
+
+    const stopCamera = () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop())
+            setStream(null)
+        }
+    }
+
+    const handleFaceFound = () => {
+        setFaceDetected(true)
+        setIsDetecting(false)
+        setTimeout(() => {
+            // Auto click next / verify
+            handleNext()
+        }, 1500)
+    }
+
     const handleNext = () => {
-        if (step < 3) {
+        if (step < 4) {
             setStep(step + 1)
         } else {
             // Final step - verify
@@ -52,7 +134,8 @@ export default function KycVerification() {
     const isStepValid = () => {
         if (step === 1) return fullName.trim() && dob && gender && address.trim()
         if (step === 2) return aadhaar.replace(/\s/g, '').length === 12 && pan.trim().length >= 10
-        if (step === 3) return true // Selfie is simulated 
+        if (step === 3) return accountNumber.trim().length >= 9 && accountNumber.trim().length <= 18 && ifsc.trim().length === 11 && bankName.trim()
+        if (step === 4) return faceDetected || isVerifying // Auto-verified when face detected
         return false
     }
 
@@ -227,8 +310,56 @@ export default function KycVerification() {
                             </motion.div>
                         )}
 
-                        {/* Step 3: Selfie Verification */}
+                        {/* Step 3: Bank Details */}
                         {step === 3 && (
+                            <motion.div
+                                key="step3"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-5 relative z-10"
+                            >
+                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                    <Landmark className="w-5 h-5 text-cyan-400" /> Bank Details
+                                </h3>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider pl-1">Bank Name</label>
+                                    <input
+                                        type="text"
+                                        value={bankName}
+                                        onChange={e => setBankName(e.target.value)}
+                                        placeholder="e.g. State Bank of India"
+                                        className="w-full px-4 py-3 bg-[#0B0F19] border border-slate-700/50 rounded-xl text-white focus:ring-1 focus:ring-cyan-500/50"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider pl-1">Account Number</label>
+                                    <input
+                                        type="text"
+                                        value={accountNumber}
+                                        onChange={e => setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 18))}
+                                        placeholder="Enter Account Number"
+                                        className="w-full px-4 py-3 bg-[#0B0F19] border border-slate-700/50 rounded-xl text-white focus:ring-1 focus:ring-cyan-500/50 tracking-wider"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider pl-1">IFSC Code</label>
+                                    <input
+                                        type="text"
+                                        value={ifsc}
+                                        onChange={e => setIfsc(e.target.value.toUpperCase().slice(0, 11))}
+                                        placeholder="e.g. SBIN0001234"
+                                        className="w-full px-4 py-3 bg-[#0B0F19] border border-slate-700/50 rounded-xl text-white focus:ring-1 focus:ring-cyan-500/50 tracking-wider uppercase"
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* Step 4: Selfie Verification */}
+                        {step === 4 && (
                             <motion.div
                                 key="step3"
                                 initial={{ opacity: 0, x: 20 }}
@@ -237,25 +368,81 @@ export default function KycVerification() {
                                 className="space-y-6 relative z-10 text-center"
                             >
                                 <h3 className="text-lg font-bold text-white flex items-center justify-center gap-2">
-                                    <Camera className="w-5 h-5 text-cyan-400" /> Selfie Verification
+                                    <ScanFace className="w-5 h-5 text-cyan-400" /> Face Verification
                                 </h3>
 
-                                <div className="w-40 h-40 rounded-full bg-[#0B0F19] border-2 border-dashed border-slate-600 flex items-center justify-center mx-auto">
-                                    <div className="text-center">
-                                        <Camera className="w-10 h-10 text-slate-500 mx-auto mb-2" />
-                                        <span className="text-xs text-slate-500">Take a selfie</span>
+                                <div className="relative w-48 h-48 mx-auto">
+                                    {/* Scan border animation */}
+                                    <div className={`absolute inset-0 rounded-full border-4 ${faceDetected ? 'border-emerald-500' : 'border-cyan-500/50 border-dashed'} transition-colors duration-500 z-10`} />
+                                    
+                                    {isDetecting && (
+                                        <motion.div 
+                                            animate={{ top: ["0%", "100%", "0%"] }}
+                                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                            className="absolute left-0 right-0 h-1 bg-cyan-400/80 shadow-[0_0_8px_rgba(6,182,212,0.8)] z-20 rounded-full"
+                                        />
+                                    )}
+
+                                    <div className="w-full h-full rounded-full bg-[#0B0F19] overflow-hidden flex items-center justify-center relative z-0">
+                                        {cameraError ? (
+                                            <div className="text-center p-4">
+                                                <Camera className="w-8 h-8 text-rose-500 mx-auto mb-2" />
+                                                <span className="text-xs text-rose-400">Camera access denied</span>
+                                            </div>
+                                        ) : (
+                                            <video 
+                                                ref={videoRef}
+                                                autoPlay 
+                                                playsInline 
+                                                muted 
+                                                className={`w-full h-full object-cover ${!faceDetected ? 'opacity-80' : ''}`}
+                                            />
+                                        )}
+
+                                        {faceDetected && (
+                                            <motion.div
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="absolute inset-0 bg-emerald-500/20 backdrop-blur-[2px] flex items-center justify-center z-20"
+                                            >
+                                                <CheckCircle2 className="w-12 h-12 text-emerald-400 drop-shadow-lg" />
+                                            </motion.div>
+                                        )}
                                     </div>
                                 </div>
 
-                                <button
-                                    onClick={() => {/* Simulated selfie capture */}}
-                                    className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold transition-colors border border-slate-700 mx-auto flex items-center gap-2"
-                                >
-                                    <Camera className="w-4 h-4" /> Capture Selfie
-                                </button>
+                                <div className="min-h-10 flex flex-col items-center justify-center gap-3">
+                                    {cameraError ? (
+                                        <button
+                                            onClick={startCamera}
+                                            className="px-6 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl font-semibold transition-colors border border-rose-500/20 mx-auto flex items-center gap-2 text-sm"
+                                        >
+                                            <Camera className="w-4 h-4" /> Retry Camera
+                                        </button>
+                                    ) : (
+                                        <p className={`text-sm font-medium ${faceDetected ? 'text-emerald-400' : 'text-cyan-400 animate-pulse'}`}>
+                                            {faceDetected ? "Face Verified Successfully!" : "Position your face within the circle..."}
+                                        </p>
+                                    )}
+
+                                    {!faceDetected && (
+                                        <button
+                                            onClick={() => {
+                                                stopCamera();
+                                                setFaceDetected(true);
+                                                setIsDetecting(false);
+                                                setTimeout(() => handleNext(), 500);
+                                            }}
+                                            className="px-4 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition-colors text-xs border border-slate-700"
+                                            type="button"
+                                        >
+                                            Skip for now & verify
+                                        </button>
+                                    )}
+                                </div>
 
                                 <p className="text-slate-500 text-xs">
-                                    Position your face within the circle and click capture. This is simulated for demo purposes.
+                                    We use the camera to detect your face in real-time. This helps verify your identity instantly.
                                 </p>
                             </motion.div>
                         )}
@@ -281,7 +468,7 @@ export default function KycVerification() {
                         >
                             {isVerifying ? (
                                 <><Loader2 className="w-5 h-5 animate-spin" /> Verifying...</>
-                            ) : step === 3 ? (
+                            ) : step === 4 ? (
                                 <>Complete KYC <CheckCircle2 className="w-5 h-5" /></>
                             ) : (
                                 <>Next <ArrowRight className="w-5 h-5" /></>

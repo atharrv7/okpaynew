@@ -100,7 +100,7 @@ export default function BankLinking() {
                                 label="Account Number"
                                 placeholder="XXXXXXXXXXXX"
                                 value={accountNo}
-                                onChange={e => setAccountNo(e.target.value)}
+                                onChange={e => setAccountNo(e.target.value.replace(/\D/g, '').slice(0, 18))}
                                 required
                             />
                             <Input

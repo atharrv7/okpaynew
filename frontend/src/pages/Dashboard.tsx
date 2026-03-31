@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion"
-import { Wallet, ArrowUpRight, ArrowDownRight, CreditCard, ShieldCheck, Clock, History, Bell, Plus, X } from "lucide-react"
+import { Wallet, ArrowUpRight, ArrowDownRight, CreditCard, ShieldCheck, Clock, History, Bell, Plus, X, Eye, EyeOff } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 
@@ -35,6 +35,9 @@ export default function Dashboard() {
     const [showNotifications, setShowNotifications] = useState(false)
     const [showAddMoney, setShowAddMoney] = useState(false)
     const [addAmount, setAddAmount] = useState("")
+    const [showBalance, setShowBalance] = useState(false)
+    const [showPinModal, setShowPinModal] = useState(false)
+    const [pin, setPin] = useState("")
 
     const handleAddMoney = () => {
         if (!addAmount || Number(addAmount) <= 0) return
@@ -133,8 +136,17 @@ export default function Dashboard() {
                             <Wallet className="w-5 h-5" />
                             <span className="font-medium text-sm tracking-wide uppercase">Wallet Balance</span>
                         </div>
-                        <div className="text-5xl md:text-6xl font-bold text-white tracking-tight flex items-center gap-1">
-                            <span className="text-cyan-400">₹</span>{balance}
+                        <div className="flex items-center gap-4">
+                            <div className="text-5xl md:text-6xl font-bold text-white tracking-tight flex items-center gap-1">
+                                <span className="text-cyan-400">₹</span>
+                                {showBalance ? balance : "••••••"}
+                            </div>
+                            <button
+                                onClick={() => showBalance ? setShowBalance(false) : setShowPinModal(true)}
+                                className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                            >
+                                {showBalance ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                            </button>
                         </div>
                     </div>
 
@@ -334,6 +346,51 @@ export default function Dashboard() {
 
                             <button onClick={handleAddMoney} disabled={!addAmount} className="w-full flex items-center justify-center gap-2 py-4 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:hover:bg-cyan-500 text-[#020817] font-bold rounded-2xl transition-all">
                                 Confirm & Add
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* PIN Verification Modal */}
+            <AnimatePresence>
+                {showPinModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowPinModal(false)} />
+                        <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-sm bg-[#0F1629] border border-slate-700 rounded-[32px] shadow-2xl p-6 md:p-8 text-center text-white">
+                            <button onClick={() => { setShowPinModal(false); setPin(""); }} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors">
+                                <X className="w-5 h-5" />
+                            </button>
+                            <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto mb-4">
+                                <ShieldCheck className="w-8 h-8" />
+                            </div>
+                            <h2 className="text-2xl font-bold mb-2">Enter PIN</h2>
+                            <p className="text-slate-400 text-sm mb-6">Enter your security PIN to view balance.</p>
+                            
+                            <div className="relative mb-6 flex justify-center">
+                                <input
+                                    type="password"
+                                    placeholder="••••"
+                                    value={pin}
+                                    maxLength={6}
+                                    onChange={e => setPin(e.target.value.replace(/\\D/g, ''))}
+                                    className="w-3/4 px-4 py-4 bg-[#121A2F] border border-slate-700/50 rounded-2xl text-2xl font-bold text-center tracking-widest text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-slate-600"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    if (pin.length >= 4) {
+                                        setShowBalance(true);
+                                        setShowPinModal(false);
+                                        setPin("");
+                                    }
+                                }}
+                                disabled={pin.length < 4}
+                                className="w-full flex items-center justify-center gap-2 py-4 bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50 disabled:hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all"
+                            >
+                                Verify PIN
                             </button>
                         </motion.div>
                     </div>

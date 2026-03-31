@@ -21,6 +21,8 @@ import Success from "./pages/payment/Success"
 import TransactionHistory from "./pages/payment/TransactionHistory"
 import PayLink from "./pages/payment/PayLink"
 import PaySuccess from "./pages/payment/PaySuccess"
+import FakeUpiGateway from "./pages/payment/FakeUpiGateway"
+import OkPayGateway from "./pages/payment/OkPayGateway"
 import Landing from "./pages/Landing"
 import KycVerification from "./pages/setup/KycVerification"
 
@@ -63,6 +65,8 @@ function App() {
               <Route path="receive" element={<ReceiveMoney />} />
               <Route path="processing" element={<Processing />} />
               <Route path="success" element={<Success />} />
+              <Route path="fake-upi" element={<FakeUpiGateway />} />
+              <Route path="okpay-gateway" element={<OkPayGateway />} />
 
               <Route path="mobile" element={<div className="p-4"><h1 className="text-2xl font-bold mb-4">Mobile Recharge</h1><p className="text-slate-400">Select Operator...</p></div>} />
               <Route path="dth" element={<div className="p-4"><h1 className="text-2xl font-bold mb-4">DTH Recharge</h1><p className="text-slate-400">Select Provider...</p></div>} />
