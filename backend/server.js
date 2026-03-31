@@ -13,11 +13,7 @@ process.on('uncaughtException', () => {});
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: "https://okpaynew-sdwp.vercel.app",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
 // Basic Route for testing
