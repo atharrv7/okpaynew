@@ -18,7 +18,7 @@ import {
     EyeOff
 } from "lucide-react"
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"
+const BACKEND_URL = "https://okpay-3818.onrender.com"
 
 export default function OkPayGateway() {
     const location = useLocation()
