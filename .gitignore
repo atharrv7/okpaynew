@@ -1,3 +1,17 @@
 node_modules
 .env
 dist
+
+# Stale output logs
+git_push_output.txt
+git_push_output_utf8.txt
+*.log
+
+# IDE
+.vscode/
+
+# Frontend build/lint artifacts
+frontend/lint.txt
+frontend/lint-utf8.txt
+frontend/tsc.txt
+frontend/tsc-utf8.txt

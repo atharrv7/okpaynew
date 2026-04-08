@@ -3,7 +3,7 @@ import { Wallet, ArrowUpRight, ArrowDownRight, CreditCard, ShieldCheck, Clock, H
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 const getStoredTxns = () => {
     const raw = localStorage.getItem('okpay_transactions')
@@ -51,10 +51,7 @@ export default function Dashboard() {
         setAddAmount("")
     }
 
-    // Removed direct state calls from useEffect during mount
-    useEffect(() => {
-        // Future sync or subscriptions if needed
-    }, [])
+
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-10">
@@ -373,7 +370,7 @@ export default function Dashboard() {
                                     placeholder="••••"
                                     value={pin}
                                     maxLength={6}
-                                    onChange={e => setPin(e.target.value.replace(/\\D/g, ''))}
+                                    onChange={e => setPin(e.target.value.replace(/\D/g, ''))}
                                     className="w-3/4 px-4 py-4 bg-[#121A2F] border border-slate-700/50 rounded-2xl text-2xl font-bold text-center tracking-widest text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder:text-slate-600"
                                     autoFocus
                                 />
